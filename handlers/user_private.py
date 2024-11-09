@@ -1,3 +1,6 @@
+import os
+
+
 from aiogram.filters import CommandStart, Command, or_f
 from aiogram import types, Router, F
 from aiogram.utils.formatting import as_list, as_marked_section, Bold
@@ -26,7 +29,11 @@ async def get_cmd(message: types.Message):
         ),
         sep='\n------------------------------\n'
     )
-    await message.answer(text.as_html(),
+    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+        await message.answer(text.as_html(), 
+                         reply_markup=keyboard.admin_keyboard.as_markup(resize_keyboard=True))
+    else:
+        await message.answer(text.as_html(), 
                          reply_markup=keyboard.start_keyboard.as_markup(resize_keyboard=True))
 
 @user_private_router.message(or_f(Command('menu'), (F.text == 'Меню')))
@@ -61,3 +68,7 @@ async def get_contact(message: types.Message):
         sep='\n------------------------------\n'
     )
     await message.answer(text.as_html())
+
+@user_private_router.message(F.text.lower() == 'id')
+async def get_id(message: types.Message):
+    await message.answer(f'{message.from_user.id}')
