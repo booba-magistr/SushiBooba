@@ -31,7 +31,7 @@ async def get_cmd(message: types.Message):
     )
     if message.from_user.id == int(os.getenv('ADMIN_ID')):
         await message.answer(text.as_html(), 
-                         reply_markup=keyboard.admin_keyboard.as_markup(resize_keyboard=True))
+                         reply_markup=keyboard.add_admin_button.as_markup(resize_keyboard=True))
     else:
         await message.answer(text.as_html(), 
                          reply_markup=keyboard.start_keyboard.as_markup(resize_keyboard=True))

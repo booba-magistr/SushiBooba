@@ -11,10 +11,18 @@ start_keyboard.add(
 )
 start_keyboard.adjust(2, 2)
 
-admin_keyboard = ReplyKeyboardBuilder()
-admin_keyboard.attach(start_keyboard)
-admin_keyboard.add(
+add_admin_button = ReplyKeyboardBuilder()
+add_admin_button.attach(start_keyboard)
+add_admin_button.add(
     KeyboardButton(text='Админ-панель')
 )
-admin_keyboard.adjust(2, 2, 1)
+add_admin_button.adjust(2, 2, 1)
+
+admin_keyboard = ReplyKeyboardBuilder()
+admin_keyboard.add(
+    KeyboardButton(text='Просмотреть список товаров'),
+    KeyboardButton(text='Изменить товар'),
+    KeyboardButton(text='Удалить товар')
+)
+admin_keyboard.adjust(2, 1)
 
