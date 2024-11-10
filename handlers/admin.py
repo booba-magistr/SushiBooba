@@ -3,6 +3,8 @@ import os
 
 from aiogram import types, Router, F
 from keyboards import admin_keyboard
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
 
 
 from filters.chat_types import ChatTypeFilter, IsAdmin
@@ -27,3 +29,12 @@ async def change_product(message: types.Message):
 @admin_router.message(F.text == 'Удалить товар')
 async def delete_product(message: types.Message):
     await message.answer('Удалить товар')
+
+
+# Code for Finite State Machine
+
+class AddProduct(StatesGroup):
+    name = State()
+    description = State()
+    price = State()
+    img = State()
