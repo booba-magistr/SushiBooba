@@ -7,7 +7,7 @@ from aiogram.utils.formatting import as_list, as_marked_section, Bold
 
 
 user_private_router = Router()
-from keyboards import keyboard
+from keyboards import user_keyboard, admin_keyboard
 
 @user_private_router.message(CommandStart())
 @user_private_router.message(or_f(Command('about'), (F.text == 'О нас')))
@@ -31,10 +31,10 @@ async def get_cmd(message: types.Message):
     )
     if message.from_user.id == int(os.getenv('ADMIN_ID')):
         await message.answer(text.as_html(), 
-                         reply_markup=keyboard.add_admin_button.as_markup(resize_keyboard=True))
+                         reply_markup=admin_keyboard.add_admin_button.as_markup(resize_keyboard=True))
     else:
         await message.answer(text.as_html(), 
-                         reply_markup=keyboard.start_keyboard.as_markup(resize_keyboard=True))
+                         reply_markup=user_keyboard.start_keyboard.as_markup(resize_keyboard=True))
 
 @user_private_router.message(or_f(Command('menu'), (F.text == 'Меню')))
 async def get_message(message: types.Message):
