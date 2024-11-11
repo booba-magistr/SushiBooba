@@ -18,3 +18,10 @@ admin.add(
     KeyboardButton(text='Просмотреть список товаров'),
 )
 admin.adjust(2, 2)
+
+delete_back = ReplyKeyboardBuilder()
+delete_back.add(
+    KeyboardButton(text='Назад'),
+    KeyboardButton(text='Отмена')
+)
+delete_back.adjust(2)
