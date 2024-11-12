@@ -4,6 +4,8 @@ import os
 from aiogram.filters import CommandStart, Command, or_f
 from aiogram import types, Router, F
 from aiogram.utils.formatting import as_list, as_marked_section, Bold
+from database.orm_commands import orm_get_products
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 user_private_router = Router()
@@ -37,8 +39,13 @@ async def get_cmd(message: types.Message):
                          reply_markup=user_keyboard.start_keyboard.as_markup(resize_keyboard=True))
 
 @user_private_router.message(or_f(Command('menu'), (F.text == 'Меню')))
-async def get_message(message: types.Message):
-    await message.answer('Ваше меню')
+async def get_message(message: types.Message, session: AsyncSession):
+    for product in await orm_get_products(session):
+        await message.answer_photo(
+            product.img,
+            caption=f"<strong>{product.name}\
+                </strong>\nО товаре:{product.description}\nЦена:{product.price}"
+        )
 
 @user_private_router.message(or_f(Command('delivery'), (F.text == 'Способы получения')))
 async def get_delivery(message: types.Message):

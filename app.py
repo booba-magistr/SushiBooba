@@ -20,13 +20,13 @@ ALLOWED_UPDATES = ['message', 'edited_message']
 bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 dp = Dispatcher()
-admin_router.message.middleware(DataBaseMiddleware(session_pool=sessionmaker))
 dp.include_router(user_private_router)
 dp.include_router(admin_router)
 
 
 async def main():
     await create_db()
+    dp.update.middleware(DataBaseMiddleware(session_pool=sessionmaker))
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_my_commands(commands=private, scope=types.BotCommandScopeAllPrivateChats())
     await dp.start_polling(bot, allowed_updates=ALLOWED_UPDATES)

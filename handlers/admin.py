@@ -4,7 +4,8 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from filters.chat_types import ChatTypeFilter, IsAdmin
-from database.orm_commands import orm_add_product
+from database.orm_commands import orm_add_product, orm_get_products
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 admin_router = Router()
@@ -17,16 +18,13 @@ async def cmd_admin(message: types.Message):
                          reply_markup=admin_keyboard.admin.as_markup(resize_keyboard=True))
     
 @admin_router.message(F.text == 'Просмотреть список товаров')
-async def lst_products(message: types.Message):
-    await message.answer('Список товаров')
-
-@admin_router.message(F.text == 'Изменить товар')
-async def change_product(message: types.Message):
-    await message.answer('Какой товар изменить')
-
-@admin_router.message(F.text == 'Удалить товар')
-async def delete_product(message: types.Message):
-    await message.answer('Удалить товар')
+async def lst_products(message: types.Message, session: AsyncSession):
+    for product in await orm_get_products(session):
+        await message.answer_photo(
+            product.img,
+            caption=f"<strong>{product.name}\
+                </strong>\nО товаре:{product.description}\nЦена:{product.price}"
+        )
 
 
 # Code for Finite State Machine

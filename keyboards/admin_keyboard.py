@@ -13,8 +13,6 @@ add_admin_button.adjust(2, 2, 1)
 admin = ReplyKeyboardBuilder()
 admin.add(
     KeyboardButton(text='Добавить товар'),
-    KeyboardButton(text='Изменить товар'),
-    KeyboardButton(text='Удалить товар'),
     KeyboardButton(text='Просмотреть список товаров'),
 )
 admin.adjust(2, 2)
