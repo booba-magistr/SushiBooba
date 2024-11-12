@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 admin_router = Router()
 admin_router.message.filter(ChatTypeFilter(["private"]), IsAdmin())
+get_keyboard = admin_keyboard.add_admin_button.as_markup(resize_keyboard=True)
+edit_action = admin_keyboard.delete_back.as_markup(resize_keyboard=True)
 
 
 @admin_router.message(F.text == 'Админ-панель')
@@ -26,11 +28,11 @@ async def lst_products(message: types.Message, session: AsyncSession):
                 </strong>\nО товаре:{product.description}\nЦена:{product.price}"
         )
 
+@admin_router.message(F.text == 'В главное меню')
+async def back_to_menu(message: types.Message):
+    await message.answer('Вы вернулись в главное меню', reply_markup=get_keyboard)
 
 # Code for Finite State Machine
-
-get_keyboard = admin_keyboard.add_admin_button.as_markup(resize_keyboard=True)
-edit_action = admin_keyboard.delete_back.as_markup(resize_keyboard=True)
 
 class AddProduct(StatesGroup):
     name = State()

@@ -14,8 +14,9 @@ admin = ReplyKeyboardBuilder()
 admin.add(
     KeyboardButton(text='Добавить товар'),
     KeyboardButton(text='Просмотреть список товаров'),
+    KeyboardButton(text='В главное меню'),
 )
-admin.adjust(2, 2)
+admin.adjust(2, 1)
 
 delete_back = ReplyKeyboardBuilder()
 delete_back.add(
