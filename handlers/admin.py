@@ -4,6 +4,8 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from filters.chat_types import ChatTypeFilter, IsAdmin
+from database.orm_commands import orm_add_product
+
 
 admin_router = Router()
 admin_router.message.filter(ChatTypeFilter(["private"]), IsAdmin())
@@ -93,8 +95,11 @@ async def add_price(message: types.Message, state: FSMContext):
     await state.set_state(AddProduct.img)
 
 @admin_router.message(AddProduct.img, F.photo)
-async def add_photo(message: types.Message, state: FSMContext):
+async def add_photo(message: types.Message, state: FSMContext, session):
     await state.update_data(img=message.photo[-1].file_id)
     await message.answer('Товар добавлен', reply_markup=get_keyboard)
     data = await state.get_data()
-    await message.answer(str(data))
+
+    await orm_add_product(session, data)
+
+    await state.clear()
