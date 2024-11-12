@@ -1,5 +1,5 @@
 from aiogram import types, Router, F
-from keyboards import admin_keyboard
+from keyboards import admin_keyboard, inline_buttons
 from aiogram.filters import StateFilter
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -12,6 +12,7 @@ admin_router = Router()
 admin_router.message.filter(ChatTypeFilter(["private"]), IsAdmin())
 get_keyboard = admin_keyboard.add_admin_button.as_markup(resize_keyboard=True)
 edit_action = admin_keyboard.delete_back.as_markup(resize_keyboard=True)
+ib = inline_buttons.inline_keyboard.as_markup()
 
 
 @admin_router.message(F.text == 'Админ-панель')
@@ -25,7 +26,8 @@ async def lst_products(message: types.Message, session: AsyncSession):
         await message.answer_photo(
             product.img,
             caption=f"<strong>{product.name}\
-                </strong>\nО товаре:{product.description}\nЦена:{product.price}"
+                </strong>\nО товаре:{product.description}\nЦена:{product.price}",
+                reply_markup=ib
         )
 
 @admin_router.message(F.text == 'В главное меню')
