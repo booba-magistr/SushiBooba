@@ -44,7 +44,7 @@ async def get_message(message: types.Message, session: AsyncSession):
         await message.answer_photo(
             product.img,
             caption=f"<strong>{product.name}\
-                </strong>\nО товаре:{product.description}\nЦена:{product.price}"
+                </strong>\nО товаре:{product.description}\nЦена:{round(product.price, 2)}"
         )
 
 @user_private_router.message(or_f(Command('delivery'), (F.text == 'Способы получения')))

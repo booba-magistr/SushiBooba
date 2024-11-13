@@ -3,9 +3,17 @@ from aiogram.types import InlineKeyboardButton
 from database.models import Product
 
 
-inline_keyboard = InlineKeyboardBuilder()
-inline_keyboard.add(
-    InlineKeyboardButton(text='Удалить', callback_data=f'delete_{Product.id}'),
-    InlineKeyboardButton(text='Изменить', callback_data=f'change_{Product.id}')
-)
-inline_keyboard.adjust(2,)
+def get_inline_btn(
+    *,
+    btn: dict[str, str],
+    sizes: tuple[int] = (2,)):
+
+    keyboard = InlineKeyboardBuilder()
+
+    for text, value in btn.items():
+        if '://' in value:
+            keyboard.add(InlineKeyboardButton(text=text, url=value))
+        else:
+            keyboard.add(InlineKeyboardButton(text=text, callback_data=value))
+
+    return keyboard.adjust(*sizes).as_markup()

@@ -15,8 +15,6 @@ from common.cmd_lst import private
 from database.engine import create_db, sessionmaker
 from middlewares.db import DataBaseMiddleware
 
-ALLOWED_UPDATES = ['message', 'edited_message']
-
 bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 dp = Dispatcher()
@@ -29,7 +27,7 @@ async def main():
     dp.update.middleware(DataBaseMiddleware(session_pool=sessionmaker))
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_my_commands(commands=private, scope=types.BotCommandScopeAllPrivateChats())
-    await dp.start_polling(bot, allowed_updates=ALLOWED_UPDATES)
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 if __name__ == '__main__':
     asyncio.run(main())

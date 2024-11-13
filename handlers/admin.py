@@ -1,10 +1,11 @@
 from aiogram import types, Router, F
-from keyboards import admin_keyboard, inline_buttons
+from keyboards import admin_keyboard
+from keyboards.inline_buttons import get_inline_btn
 from aiogram.filters import StateFilter
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from filters.chat_types import ChatTypeFilter, IsAdmin
-from database.orm_commands import orm_add_product, orm_get_products
+from database.orm_commands import orm_add_product, orm_get_products, orm_delete_product
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -12,7 +13,6 @@ admin_router = Router()
 admin_router.message.filter(ChatTypeFilter(["private"]), IsAdmin())
 get_keyboard = admin_keyboard.add_admin_button.as_markup(resize_keyboard=True)
 edit_action = admin_keyboard.delete_back.as_markup(resize_keyboard=True)
-ib = inline_buttons.inline_keyboard.as_markup()
 
 
 @admin_router.message(F.text == 'Админ-панель')
@@ -22,17 +22,30 @@ async def cmd_admin(message: types.Message):
     
 @admin_router.message(F.text == 'Просмотреть список товаров')
 async def lst_products(message: types.Message, session: AsyncSession):
-    for product in await orm_get_products(session):
-        await message.answer_photo(
-            product.img,
-            caption=f"<strong>{product.name}\
-                </strong>\nО товаре:{product.description}\nЦена:{product.price}",
-                reply_markup=ib
-        )
+    if await orm_get_products(session):
+        for product in await orm_get_products(session):
+            await message.answer_photo(
+                product.img,
+                caption=f"<strong>{product.name}\
+                    </strong>\nО товаре:{product.description}\nЦена:{product.price}",
+                    reply_markup=get_inline_btn(btn={
+                        'Удалить': f'delete_{product.id}',
+                        'Изменить': f'change_{product.id}'
+                    })
+                )
+    else:
+        await message.answer('Список товаров пуст')
 
 @admin_router.message(F.text == 'В главное меню')
 async def back_to_menu(message: types.Message):
     await message.answer('Вы вернулись в главное меню', reply_markup=get_keyboard)
+
+@admin_router.callback_query(F.data.startswith('delete_'))
+async def delete_product(callback: types.CallbackQuery, session: AsyncSession):
+    product_id = callback.data.split('_')[-1]
+    await orm_delete_product(session, int(product_id))
+
+    await callback.message.answer('Товар удалён')
 
 # Code for Finite State Machine
 
