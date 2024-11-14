@@ -4,7 +4,7 @@ from sqlalchemy import Text, String, Float, DateTime, func
 
 class Base(DeclarativeBase):
     created: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
-    updated: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), onupdate=True)
+    updated: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
 
     __abstract__ = True
     

@@ -18,9 +18,10 @@ admin.add(
 )
 admin.adjust(2, 1)
 
-delete_back = ReplyKeyboardBuilder()
-delete_back.add(
+edit_buttons = ReplyKeyboardBuilder()
+edit_buttons.add(
     KeyboardButton(text='Назад'),
-    KeyboardButton(text='Отмена')
+    KeyboardButton(text='Отмена'),
+    KeyboardButton(text='Оставить без изменений')
 )
-delete_back.adjust(2)
+edit_buttons.adjust(2, 1)
