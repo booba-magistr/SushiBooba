@@ -1,0 +1,35 @@
+services:
+  bot:
+    image: telegrambot:1.0.0
+    build: ./tbot
+    container_name: telegrambot
+    volumes:
+      - ./tbot:/usr/src/tbot
+    env_file:
+      - ./tbot/.env
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: database
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=23789163
+      - POSTGRES_DB=bot
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 8080:80
+    container_name: pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=root@mail.ru
+      - PGADMIN_DEFAULT_PASSWORD=654321Qw
+    depends_on:
+      - postgres
+
+volumes:
+  data:

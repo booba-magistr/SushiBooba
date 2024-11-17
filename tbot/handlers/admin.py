@@ -81,6 +81,8 @@ async def cancel_handler(message: types.Message, state:FSMContext):
     
     if current_state is None:
         return
+    if AddProduct.current_update_product:
+        AddProduct.current_update_product = None
     
     await state.clear()
     await message.answer('Все действия отменены', reply_markup=get_keyboard)
