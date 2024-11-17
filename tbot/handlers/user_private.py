@@ -12,7 +12,7 @@ user_private_router = Router()
 from keyboards import user_keyboard, admin_keyboard
 
 @user_private_router.message(CommandStart())
-@user_private_router.message(or_f(Command('about'), (F.text == 'О нас')))
+@user_private_router.message(F.text == 'О нас')
 async def get_cmd(message: types.Message):
     text = as_list(
         as_marked_section(
@@ -38,7 +38,7 @@ async def get_cmd(message: types.Message):
         await message.answer(text.as_html(), 
                          reply_markup=user_keyboard.start_keyboard.as_markup(resize_keyboard=True))
 
-@user_private_router.message(or_f(Command('menu'), (F.text == 'Меню')))
+@user_private_router.message(F.text == 'Меню')
 async def get_message(message: types.Message, session: AsyncSession):
     for product in await orm_get_products(session):
         await message.answer_photo(
@@ -47,7 +47,7 @@ async def get_message(message: types.Message, session: AsyncSession):
                 </strong>\nО товаре:{product.description}\nЦена:{round(product.price, 2)}"
         )
 
-@user_private_router.message(or_f(Command('delivery'), (F.text == 'Способы получения')))
+@user_private_router.message(F.text == 'Способы получения')
 async def get_delivery(message: types.Message):
     text = as_marked_section(
         Bold('Способ получения'),
@@ -57,7 +57,7 @@ async def get_delivery(message: types.Message):
     )
     await message.answer(text.as_html())
 
-@user_private_router.message(or_f(Command('contact'), (F.text == 'Контакты')))
+@user_private_router.message(F.text == 'Контакты')
 async def get_contact(message: types.Message):
     text = as_list(
         as_marked_section(

@@ -2,7 +2,7 @@ import asyncio
 import os
 
 
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums.parse_mode import ParseMode
 
@@ -11,8 +11,7 @@ load_dotenv(find_dotenv())
 
 from handlers.user_private import user_private_router
 from handlers.admin import admin_router
-from common.cmd_lst import private
-from database.engine import create_db, sessionmaker
+from database.engine import create_db, sessionmaker, drop_db
 from middlewares.db import DataBaseMiddleware
 
 bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
@@ -23,10 +22,10 @@ dp.include_router(admin_router)
 
 
 async def main():
-    await create_db()
+    await drop_db()
+    # await create_db()
     dp.update.middleware(DataBaseMiddleware(session_pool=sessionmaker))
     await bot.delete_webhook(drop_pending_updates=True)
-    await bot.set_my_commands(commands=private, scope=types.BotCommandScopeAllPrivateChats())
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 if __name__ == '__main__':

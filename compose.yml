@@ -3,8 +3,15 @@ services:
     image: telegrambot:1.0.0
     build: ./tbot
     container_name: telegrambot
-    volumes:
-      - ./tbot:/usr/src/tbot
+    develop:
+      watch:
+        - action: sync
+          path: ./tbot
+          target: /usr/src/tbot
+        - action: rebuild
+          path: ./tbot/app.py
+        - action: rebuild
+          path: ./tbot/requirements.txt
     env_file:
       - ./tbot/.env
     depends_on:
