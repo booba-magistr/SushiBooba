@@ -22,8 +22,8 @@ dp.include_router(admin_router)
 
 
 async def main():
-    await drop_db()
-    # await create_db()
+    # await drop_db()
+    await create_db()
     dp.update.middleware(DataBaseMiddleware(session_pool=sessionmaker))
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())

@@ -11,14 +11,6 @@ class Base(DeclarativeBase):
     @declared_attr.directive
     def __tablename__(cls):
         return cls.__name__.lower()
-    
-
-class Banner(Base):
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[int] = mapped_column(String(64), unique=True)
-    img: Mapped[str] = mapped_column(String(300), nullable=True)
-    description: Mapped[str] = mapped_column(String(500))
-    
 
 class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -50,5 +42,5 @@ class Cart(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey('product.id', ondelete='CASCADE'))
     quantity: Mapped[int]
 
-    user_id: Mapped['User'] = relationship(backref='cart')
-    product_id: Mapped['Product'] = relationship(backref='cart')
+    user: Mapped['User'] = relationship(backref='cart')
+    product: Mapped['Product'] = relationship(backref='cart')

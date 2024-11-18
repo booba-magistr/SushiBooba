@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 admin_router = Router()
 admin_router.message.filter(ChatTypeFilter(["private"]), IsAdmin())
 
-#Admin's keyboards
+#### Admin's keyboards ####
 get_keyboard = admin_keyboard.add_admin_button.as_markup(resize_keyboard=True)
 edit_action = admin_keyboard.edit_buttons.as_markup(resize_keyboard=True)
 
@@ -23,10 +23,21 @@ async def cmd_admin(message: types.Message):
                          reply_markup=admin_keyboard.admin.as_markup(resize_keyboard=True))
     
 @admin_router.message(F.text == 'Просмотреть список товаров')
-async def lst_products(message: types.Message, session: AsyncSession):
-    if await orm_get_products(session):
-        for product in await orm_get_products(session):
-            await message.answer_photo(
+async def get_categories(message: types.Message, session: AsyncSession):
+    btns = {category.name: f'category_{category.id}' for category in await orm_get_categories(session)}
+    await message.answer('Выберите категорию', 
+                         reply_markup=get_inline_btn(btn=btns, sizes=(2, 2)))
+    
+@admin_router.callback_query(F.data.startswith('category'))
+async def lst_products(callback: types.CallbackQuery, session: AsyncSession):
+    category_id = callback.data.split('_')[-1]
+    if not await orm_get_products(session, category_id):
+        await callback.answer()
+        await callback.message.answer('Товары по данной категории отсутствуют')
+    else:
+        await callback.answer()
+        for product in await orm_get_products(session, int(category_id)):
+            await callback.message.answer_photo(
                 product.img,
                 caption=f"<strong>{product.name}\
                     </strong>\nО товаре:{product.description}\nЦена:{product.price}",
@@ -34,9 +45,7 @@ async def lst_products(message: types.Message, session: AsyncSession):
                         'Удалить': f'delete_{product.id}',
                         'Изменить': f'change_{product.id}'
                     })
-                )
-    else:
-        await message.answer('Список товаров пуст')
+            )
 
 @admin_router.message(F.text == 'В главное меню')
 async def back_to_menu(message: types.Message):
@@ -50,10 +59,11 @@ async def delete_product(callback: types.CallbackQuery, session: AsyncSession):
     await callback.answer()
     await callback.message.answer('Товар удалён')
 
-# Code for Finite State Machine
+#### Code for Finite State Machine to add product in menu ####
 
 class AddProduct(StatesGroup):
     name = State()
+    category = State()
     description = State()
     price = State()
     img = State()
@@ -105,13 +115,26 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
         previous = step
 
 @admin_router.message(AddProduct.name, or_f(F.text, F.text == 'Оставить без изменений'))
-async def add_name(message: types.Message, state: FSMContext):
+async def add_name(message: types.Message, state: FSMContext, session: AsyncSession):
     if message.text == 'Оставить без изменений':
         await state.update_data(name = AddProduct.current_update_product.name)
     else:
         await state.update_data(name=message.text)
-    await message.answer('Укажите описание товара', reply_markup=edit_action)
+    btns = {category.name: str(category.id) for category in await orm_get_categories(session)}
+    await message.answer('К какой категории будет относится товар', 
+                         reply_markup=get_inline_btn(btn=btns, sizes=(2, 2)))
+    await state.set_state(AddProduct.category)
+
+@admin_router.callback_query(AddProduct.category, F.data.isdigit())
+async def add_category(callback: types.CallbackQuery, state: FSMContext):
+    if callback.message.text == 'Оставить без изменений':
+        await state.update_data(category = AddProduct.current_update_product.category)
+    else:
+        await state.update_data(category=int(callback.data))
+        await callback.answer()
+    await callback.message.answer('Укажите описание товара')
     await state.set_state(AddProduct.description)
+
 
 @admin_router.message(AddProduct.description, or_f(F.text, F.text == 'Оставить без изменений'))
 async def add_description(message: types.Message, state: FSMContext):
