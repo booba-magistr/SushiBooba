@@ -9,7 +9,7 @@ services:
           path: ./tbot
           target: /usr/src/tbot
         - action: rebuild
-          path: ./tbot/app.py
+          path: ./tbot
         - action: rebuild
           path: ./tbot/requirements.txt
     env_file:
