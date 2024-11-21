@@ -13,10 +13,12 @@ add_admin_button.adjust(2, 2, 1)
 admin = ReplyKeyboardBuilder()
 admin.add(
     KeyboardButton(text='Добавить товар'),
-    KeyboardButton(text='Просмотреть список товаров'),
+    KeyboardButton(text='Список товаров'),
+    KeyboardButton(text='Добавить баннер'),
+    KeyboardButton(text='Список баннеров'),
     KeyboardButton(text='В главное меню'),
 )
-admin.adjust(2, 1)
+admin.adjust(2, 2, 1)
 
 edit_buttons = ReplyKeyboardBuilder()
 edit_buttons.add(

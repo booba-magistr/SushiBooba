@@ -1,8 +1,44 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import Product, Category
+from .models import Product, Category, Banner
 from sqlalchemy import select, delete, update
 
 
+#################### CRUD for banners ####################
+
+async def orm_add_banners(session: AsyncSession, data):
+    obj = Banner(
+        img = data['img'],
+        banner_name = data['banner_name'],
+        title = data['title'],
+    )
+    session.add(obj)
+    await session.commit()
+
+async def orm_get_banners(session: AsyncSession):
+    queryset = select(Banner)
+    result = await session.execute(queryset)
+    return result.scalars().all()
+
+async def orm_get_banner(session: AsyncSession, banner_id):
+    queryset = select(Banner).where(Banner.id == banner_id)
+    result = await session.execute(queryset)
+    return result.scalar()
+
+async def orm_delete_banner(session: AsyncSession, banner_id):
+    query = delete(Banner).where(Banner.id == int(banner_id))
+    await session.execute(query)
+    await session.commit()
+
+async def orm_update_banner(session: AsyncSession, banner_id, data: dict):
+    query = update(Banner).where(Banner.id == int(banner_id)).values(
+        banner_name = data['banner_name'],
+        title = data['title'],
+        img = data['img']
+    )
+    await session.execute(query)
+    await session.commit()
+
+#################### CRUD for categories ####################
 
 async def orm_create_categories(session: AsyncSession, categories: list):
     query = select(Category)
@@ -17,7 +53,7 @@ async def orm_get_categories(session: AsyncSession):
     result = await session.execute(queryset)
     return result.scalars().all()
 
-### CRUD for Admin ###
+#################### CRUD for Products ####################
 
 async def orm_add_product(session: AsyncSession, data):
     obj = Product(
@@ -52,6 +88,6 @@ async def orm_update_product(session: AsyncSession, product_id, data):
     await session.commit()
 
 async def orm_delete_product(session: AsyncSession, product_id):
-    product = delete(Product).where(Product.id == product_id)
+    product = delete(Product).where(Product.id == int(product_id))
     await session.execute(product)
     await session.commit()

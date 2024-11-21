@@ -44,3 +44,10 @@ class Cart(Base):
 
     user: Mapped['User'] = relationship(backref='cart')
     product: Mapped['Product'] = relationship(backref='cart')
+
+
+class Banner(Base):
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    banner_name: Mapped[str] = mapped_column(String(128))
+    title: Mapped[str] = mapped_column(String(128))
+    img: Mapped[str] = mapped_column(String(200), nullable=True)
