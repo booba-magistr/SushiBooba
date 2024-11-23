@@ -4,8 +4,9 @@ import os
 from aiogram.filters import CommandStart, Command, or_f
 from aiogram import types, Router, F
 from aiogram.utils.formatting import as_list, as_marked_section, Bold
-from keyboards.inline_buttons import get_inline_btn
+from keyboards.inline_buttons import MenuCallback
 from sqlalchemy.ext.asyncio import AsyncSession
+from .callback_data import get_categories_menu
 
 
 user_private_router = Router()
@@ -39,15 +40,15 @@ async def get_cmd(message: types.Message):
                          reply_markup=user_keyboard.start_keyboard.as_markup(resize_keyboard=True))
 
 @user_private_router.message(F.text == 'Меню')
-async def get_menu(message: types.Message):
-    await message.answer('Вы нажали на кнопку меню 1 раз', 
-                         reply_markup=get_inline_btn(btn={'Меню': 'count_1'}))
+async def get_menu(message: types.Message, session: AsyncSession):
+    keyboard, img = await get_categories_menu(session, banner_name='categories')
+    await message.answer_photo(img.media, caption=img.caption, reply_markup=keyboard)
 
-@user_private_router.callback_query(F.data.startswith('count'))
-async def get_btn(callback: types.CallbackQuery):
-    number = int(callback.data.split('_')[-1])
-    await callback.message.edit_text(text=f'Вы нажали на кнопку меню {number} раз', 
-                                     reply_markup=get_inline_btn(btn={'Меню': f'count_{number+1}'}))
+@user_private_router.callback_query(MenuCallback.filter())
+async def user_menu(callback: types.CallbackQuery, callback_data: MenuCallback, session: AsyncSession):
+    keyboard, img = await get_categories_menu(session,
+                                              banner_name=callback_data.banner_name, 
+                                              category=callback_data.category)
 
 @user_private_router.message(F.text == 'Способы получения')
 async def get_delivery(message: types.Message):

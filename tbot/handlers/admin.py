@@ -86,7 +86,7 @@ async def update_item(callback: types.CallbackQuery, state: FSMContext, session:
         await callback.message.answer('Введите название товара', reply_markup=edit_action)
         await state.set_state(AddProduct.name)
     else:
-        current_update_banner = await orm_get_banner(session, int(obj[-1]))
+        current_update_banner = await orm_get_banner(session, obj[-1])
         Banner.current_update_banner = current_update_banner
         await callback.answer()
         await callback.message.answer('Выберите тип баннера', 
@@ -100,9 +100,9 @@ async def update_item(callback: types.CallbackQuery, state: FSMContext, session:
 @admin_router.message(F.text == 'Список баннеров')
 async def get_banners(message: types.Message, session: AsyncSession):
 
-    categories = {'category': 'Выбор категории',
-                  'menu': 'Меню товаров',
-                  'cart': 'Корзина пользователя'}
+    types = {"categories": 'Выбор категории товаров',
+             'menu': 'Меню товаров',
+             'cart': 'Корзина пользователя'}
 
     if not await orm_get_banners(session):
         await message.answer('Список баннеров на данный момент пуст')
@@ -110,10 +110,10 @@ async def get_banners(message: types.Message, session: AsyncSession):
         for banner in await orm_get_banners(session):
             await message.answer_photo(
                 banner.img,
-                caption=f"<strong>{banner.title}</strong>\nТип баннера: {categories[banner.banner_name]}",
+                caption=f"<strong>{banner.title}</strong>\nТип баннера: {types[banner.banner_name]}",
                     reply_markup=get_inline_btn(btn={
-                        'Удалить': f'delete_banner_{banner.id}',
-                        'Изменить': f'change_banner_{banner.id}'
+                        'Удалить': f'delete_banner_{banner.banner_name}',
+                        'Изменить': f'change_banner_{banner.banner_name}'
                     })
             )
 
@@ -129,8 +129,8 @@ class Banner(StatesGroup):
 @admin_router.message(StateFilter(None), F.text == 'Добавить баннер')
 async def update_banner(message: types.Message, state: FSMContext):
     await message.answer('Выберите тип баннера', 
-                         reply_markup=get_inline_btn(btn={'Выбор категории': 'categories',
-                                                      'Меню товаров': 'menu',
+                         reply_markup=get_inline_btn(btn={'Выбор в меню категории': 'categories',
+                                                      'Меню': 'menu',
                                                       'Корзина пользователя': 'cart'}))
     await state.set_state(Banner.banner_name)
     

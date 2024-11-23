@@ -19,13 +19,13 @@ async def orm_get_banners(session: AsyncSession):
     result = await session.execute(queryset)
     return result.scalars().all()
 
-async def orm_get_banner(session: AsyncSession, banner_id):
-    queryset = select(Banner).where(Banner.id == banner_id)
+async def orm_get_banner(session: AsyncSession, banner_name):
+    queryset = select(Banner).where(Banner.banner_name == banner_name)
     result = await session.execute(queryset)
     return result.scalar()
 
-async def orm_delete_banner(session: AsyncSession, banner_id):
-    query = delete(Banner).where(Banner.id == int(banner_id))
+async def orm_delete_banner(session: AsyncSession, banner_name):
+    query = delete(Banner).where(Banner.banner_name == banner_name)
     await session.execute(query)
     await session.commit()
 
