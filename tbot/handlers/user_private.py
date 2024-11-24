@@ -48,7 +48,10 @@ async def get_menu(message: types.Message, session: AsyncSession):
 async def user_menu(callback: types.CallbackQuery, callback_data: MenuCallback, session: AsyncSession):
     keyboard, img = await get_categories_menu(session,
                                               banner_name=callback_data.banner_name, 
-                                              category=callback_data.category)
+                                              category=callback_data.category,
+                                              page=callback_data.page)    
+    await callback.message.edit_media(media=img, reply_markup=keyboard)
+    await callback.answer()
 
 @user_private_router.message(F.text == 'Способы получения')
 async def get_delivery(message: types.Message):
