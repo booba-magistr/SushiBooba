@@ -51,7 +51,7 @@ def get_products_btns(
 
     keyboard.add(InlineKeyboardButton(text='Назад',
                 callback_data=MenuCallback(banner_name='categories').pack()))
-    keyboard.add(InlineKeyboardButton(text='Купить',
+    keyboard.add(InlineKeyboardButton(text='Добавить в корзину',
                 callback_data=MenuCallback(banner_name='add_to_cart', product_id=product_id).pack()))
     keyboard.add(InlineKeyboardButton(text='Просмотреть корзину',
                 callback_data=MenuCallback(banner_name='cart').pack()))

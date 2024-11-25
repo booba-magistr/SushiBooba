@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import Product, Category, Banner
+from .models import Product, Category, Banner, User, Cart
 from sqlalchemy import select, delete, update
 from math import ceil
 
@@ -32,6 +32,31 @@ class Paginator:
         if self.page > 1:
             return self.page - 1
         return False
+
+#################### Create user ####################
+
+async def orm_add_user(session:AsyncSession, user_id, first_name, last_name,phone):
+    query = select(User).where(User.user_id == user_id)
+    result = await session.execute(query)
+    if result.first() is None:
+        obj = User(user_id = user_id, first_name=first_name, last_name=last_name, phone=phone)
+        session.add(obj)
+        await session.commit()
+
+################### Add product to cart ###################
+
+async def orm_add_to_cart(session: AsyncSession, user_id, product_id):
+    queryset =  select(Cart).where(Cart.user_id == user_id, Cart.product_id == product_id)
+    cart = await session.execute(queryset)
+    cart = cart.scalar()
+    if cart:
+        cart.quantity += 1
+        await session.commit()
+        return cart
+    else:
+        obj = Cart(user_id=user_id, product_id=product_id, quantity=1)
+        session.add(obj)
+        await session.commit()
 
 
 #################### CRUD for banners ####################
