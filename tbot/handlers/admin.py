@@ -130,13 +130,16 @@ class Banner(StatesGroup):
 async def update_banner(message: types.Message, state: FSMContext):
     await message.answer('Выберите тип баннера', 
                          reply_markup=get_inline_btn(btn={'Выбор в меню категории': 'categories',
-                                                      'Меню': 'menu',
                                                       'Корзина пользователя': 'cart'}))
     await state.set_state(Banner.banner_name)
     
 @admin_router.callback_query(Banner.banner_name, F.data)
-async def add_banner_name(callback: types.CallbackQuery, state: FSMContext):
+async def add_banner_name(callback: types.CallbackQuery, state: FSMContext, session: AsyncSession):
     await callback.answer()
+    if await orm_get_banner(session, callback.data):
+        await callback.message.answer('Данный баннер уже существует')
+        await state.clear()
+        return
     await state.update_data(banner_name = callback.data)
     await callback.message.answer('Укажите описание баннера', reply_markup=edit_action)
     await state.set_state(Banner.title)
@@ -249,6 +252,11 @@ async def add_price(message: types.Message, state: FSMContext):
     if message.text == 'Оставить без изменений':
         await state.update_data(price = AddProduct.current_update_product.price)
     else:
+        try:
+            float(message.text)
+        except ValueError:
+            await message.answer('Введено некорректное значение! Попробуйте ещё раз.')
+            return
         await state.update_data(price=float(message.text))
     await message.answer('Установите фотографию', reply_markup=edit_action)
     await state.set_state(AddProduct.img)
