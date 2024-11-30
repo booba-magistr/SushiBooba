@@ -2,36 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .models import Product, Category, Banner, User, Cart
 from sqlalchemy import select, delete, update
 from math import ceil
+from sqlalchemy.orm import joinedload
 
-
-##################### Paginator #####################
-
-class Paginator:
-    def __init__(self, lst, page=1, per_page=1) -> None:
-        self.lst = lst
-        self.page = page
-        self.per_page = per_page
-        self.length = len(lst)
-        self.pages = ceil(self.length / self.per_page)
-
-    def get_slice(self):
-        start = (self.page - 1) * self.per_page
-        stop = start + self.per_page
-        return self.lst[start: stop]
-
-    def get_page(self):
-        page_items = self.get_slice()
-        return page_items
-
-    def has_next(self):
-        if self.page < self.length:
-            return self.page + 1
-        return False
-        
-    def has_previous(self):
-        if self.page > 1:
-            return self.page - 1
-        return False
 
 #################### Create user ####################
 
@@ -43,7 +15,7 @@ async def orm_add_user(session:AsyncSession, user_id, first_name, last_name,phon
         session.add(obj)
         await session.commit()
 
-################### Add product to cart ###################
+################### CRUD cart ###################
 
 async def orm_add_to_cart(session: AsyncSession, user_id, product_id):
     queryset =  select(Cart).where(Cart.user_id == user_id, Cart.product_id == product_id)
@@ -57,6 +29,32 @@ async def orm_add_to_cart(session: AsyncSession, user_id, product_id):
         obj = Cart(user_id=user_id, product_id=product_id, quantity=1)
         session.add(obj)
         await session.commit()
+
+async def orm_delete_from_cart(session: AsyncSession, user_id, product_id):
+    queryset = delete(Cart).where(Cart.user_id == user_id, Cart.product_id == product_id)
+    await session.execute(queryset)
+    await session.commit()
+
+async def orm_get_user_carts(session: AsyncSession, user_id:int):
+    queryset = select(Cart).filter(Cart.user_id == user_id).options(joinedload(Cart.product))
+    result = await session.execute(queryset)
+    return result.scalars().all()
+
+async def orm_reduce_product_in_cart(session: AsyncSession, user_id: int, product_id: int):
+    query = select(Cart).where(Cart.user_id == user_id, Cart.product_id == product_id)
+    cart = await session.execute(query)
+    cart = cart.scalar()
+
+    if not cart:
+        return
+    if cart.quantity > 1:
+        cart.quantity -= 1
+        await session.commit()
+        return True
+    else:
+        await orm_delete_from_cart(session, user_id, product_id)
+        await session.commit()
+        return False
 
 
 #################### CRUD for banners ####################

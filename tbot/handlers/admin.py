@@ -186,7 +186,7 @@ async def lst_products(callback: types.CallbackQuery, session: AsyncSession):
         await callback.message.answer('Товары по данной категории отсутствуют')
     else:
         await callback.answer()
-        for product in await orm_get_products(session, int(category_id)):
+        for product in await orm_get_products(session, category_id):
             await callback.message.answer_photo(
                 product.img,
                 caption=f"<strong>{product.name}\
